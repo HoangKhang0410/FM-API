@@ -1,6 +1,6 @@
 import { BelongsToMany, Column, Default, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Optional, DataTypes } from 'sequelize';
-import { Person } from './Person';
+import { User } from './User';
 import { Enroll } from './Enroll';
 
 interface ClassAttributes {
@@ -24,6 +24,6 @@ export class Class extends Model<ClassAttributes, ClassCreationAttributes> {
     @Column(DataTypes.UUID)
     creatorId: string;
 
-    @BelongsToMany(() => Person, () => Enroll)
-    persons: Person[];
+    @BelongsToMany(() => User, () => Enroll)
+    users: User[];
 }
