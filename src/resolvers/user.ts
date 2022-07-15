@@ -1,46 +1,52 @@
-// import { GraphQLFieldResolver } from 'graphql';
-// import { Person } from '../models/Person';
-// export const resolvers = {
-//     Query: {
-//         people: async () => {
-//             const persons: Person[] = await Person.findAll();
-//             return persons;
-//         },
-//     },
-//     Mutation: {
-//         register: async (param1: ParentNode, param2: Args, param3): Promise<Person> => {
-//             const person: Person = await Person.findOne({ where: { $id$: '1' } });
-//             console.log(param1);
-//             console.log(param2);
-//             console.log(param3);
-//             return person;
-//         },
-//     },
-// };
-
-import { Query, Resolver, Mutation, Arg, Ctx } from 'type-graphql';
-import { User as UserSchema } from '../schema/user';
+import { Query, Resolver, Mutation, Arg, Ctx, UseMiddleware, Args } from 'type-graphql';
 import { User as UserModel } from '../models/User';
 import { RegisterInput } from '../types/RegisterInput';
 import argon2 from 'argon2';
-import { UserMutationResponse } from '../types/UserMutationResponse';
+import { UserResponse } from '../types/UserResponse';
 import { LoginInput } from '../types/LoginInput';
 import { Context } from '../types/Context';
 import { createToken, sendRefreshToken } from '../utils/auth';
+import { verifyToken } from '../middlewares/auth';
 
 @Resolver(() => UserModel)
 export class UserResolver {
-    @Query(() => [UserModel])
-    async getUsers(): Promise<UserModel[]> {
-        const users: UserModel[] = await UserModel.findAll();
-        return users;
+    @Query(() => UserResponse)
+    @UseMiddleware(verifyToken)
+    async getUsers(@Ctx() { user }: Context): Promise<UserResponse> {
+        console.log(user);
+        const users = await UserModel.findAll();
+        return {
+            code: 200,
+            success: true,
+            message: 'Get users successfully',
+            users: users,
+        };
     }
 
-    @Mutation(() => UserMutationResponse)
+    @Query(() => UserResponse)
+    @UseMiddleware(verifyToken)
+    async getUserInfo(@Arg('userId') userId: string): Promise<UserResponse> {
+        const currentUser = await UserModel.findOne({ where: { id: userId } });
+        if (!currentUser) {
+            return {
+                code: 400,
+                success: false,
+                message: 'User not found',
+            };
+        }
+        return {
+            code: 200,
+            success: true,
+            message: 'Get User successfully',
+            user: currentUser,
+        };
+    }
+
+    @Mutation(() => UserResponse)
     async register(
         @Arg('registerInput')
         registerInput: RegisterInput
-    ): Promise<UserMutationResponse> {
+    ): Promise<UserResponse> {
         const { name, username, password, role } = registerInput;
         const existingUser = await UserModel.findOne({ where: { username: username } });
         if (existingUser !== null) {
@@ -60,11 +66,8 @@ export class UserResolver {
             };
         }
     }
-    @Mutation(() => UserMutationResponse)
-    async login(
-        @Arg('loginInput') { username, password }: LoginInput,
-        @Ctx() { res }: Context
-    ): Promise<UserMutationResponse> {
+    @Mutation(() => UserResponse)
+    async login(@Arg('loginInput') { username, password }: LoginInput, @Ctx() { res }: Context): Promise<UserResponse> {
         const existingUser = await UserModel.findOne({ where: { username: username } });
         if (existingUser === null) {
             return {

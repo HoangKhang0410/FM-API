@@ -7,29 +7,19 @@ import cookieParser from 'cookie-parser';
 import { sequelize } from './db/db';
 import { UserResolver } from './resolvers/user';
 import { buildSchema } from 'type-graphql';
-import { applyMiddleware } from 'graphql-middleware';
-import { rule, shield } from 'graphql-shield';
-import { Context } from './types/Context';
+import { ClassResolver } from './resolvers/class';
 
 const app: Express = express();
 
 async function main() {
     try {
         const schema = await buildSchema({
-            resolvers: [UserResolver],
+            resolvers: [UserResolver, ClassResolver],
             emitSchemaFile: false,
         });
 
-        const permissions = shield({
-            Query: {
-                getUsers: isAuthenticated,
-            },
-            Mutation: {},
-        });
-        const schemaWithPermission = applyMiddleware(schema, permissions);
-
         const server = createServer({
-            schema: schemaWithPermission,
+            schema: schema,
         });
 
         app.use(express.json());
@@ -46,7 +36,3 @@ async function main() {
 }
 
 main().catch((error) => console.log(`Error starting server: ${error}`));
-
-const isAuthenticated = rule()(async (parent, args, { req }: Context, info) => {
-    return !!req.header('Authorization');
-});
