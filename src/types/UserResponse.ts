@@ -1,3 +1,4 @@
+import { GraphQLYogaError } from '@graphql-yoga/node';
 import { Field, ObjectType } from 'type-graphql';
 import { User } from '../models/User';
 import { IMutationResponse } from './MutationResponse';
@@ -11,7 +12,7 @@ export class UserResponse implements IMutationResponse {
     @Field({ nullable: true })
     user?: User;
 
-    @Field(() => [User])
+    @Field(() => [User], { nullable: true })
     users?: User[];
 
     @Field({ nullable: true })

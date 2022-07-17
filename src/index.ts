@@ -8,13 +8,14 @@ import { sequelize } from './db/db';
 import { UserResolver } from './resolvers/user';
 import { buildSchema } from 'type-graphql';
 import { ClassResolver } from './resolvers/class';
+import { EnrollResolver } from './resolvers/enroll';
 
 const app: Express = express();
 
 async function main() {
     try {
         const schema = await buildSchema({
-            resolvers: [UserResolver, ClassResolver],
+            resolvers: [UserResolver, ClassResolver, EnrollResolver],
             emitSchemaFile: false,
         });
 
@@ -27,7 +28,7 @@ async function main() {
         app.use(cookieParser());
         app.use('/graphql', server);
         await sequelize.sync({ force: true });
-        console.log('Connect to db successfully!!');
+        console.log('Connect to db successfully!!!');
 
         app.listen(4000, () => console.log('Running a GraphQL API server at http://localhost:4000/graphql'));
     } catch (error) {

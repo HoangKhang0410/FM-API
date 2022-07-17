@@ -1,3 +1,4 @@
+import { GraphQLYogaError } from '@graphql-yoga/node';
 import { Field, InterfaceType } from 'type-graphql';
 
 @InterfaceType()

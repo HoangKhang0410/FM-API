@@ -7,6 +7,7 @@ import { LoginInput } from '../types/LoginInput';
 import { Context } from '../types/Context';
 import { createToken, sendRefreshToken } from '../utils/auth';
 import { verifyToken } from '../middlewares/auth';
+import { UserInput } from '../types/UserInput';
 
 @Resolver(() => UserModel)
 export class UserResolver {
@@ -26,20 +27,86 @@ export class UserResolver {
     @Query(() => UserResponse)
     @UseMiddleware(verifyToken)
     async getUserInfo(@Arg('userId') userId: string): Promise<UserResponse> {
-        const currentUser = await UserModel.findOne({ where: { id: userId } });
-        if (!currentUser) {
+        try {
+            const currentUser = await UserModel.findOne({ where: { id: userId } });
+            if (!currentUser) {
+                return {
+                    code: 400,
+                    success: false,
+                    message: 'User not found',
+                };
+            }
+            return {
+                code: 200,
+                success: true,
+                message: 'Get User successfully',
+                user: currentUser,
+            };
+        } catch (error) {
             return {
                 code: 400,
                 success: false,
-                message: 'User not found',
+                message: `Error when getting User info, ${error}`,
             };
         }
-        return {
-            code: 200,
-            success: true,
-            message: 'Get User successfully',
-            user: currentUser,
-        };
+    }
+
+    @Mutation(() => UserResponse)
+    @UseMiddleware(verifyToken)
+    async deleteUserInfo(@Arg('userId') userId: string): Promise<UserResponse> {
+        try {
+            const existingUser = await UserModel.findOne({ where: { id: userId } });
+            if (existingUser === null) {
+                return {
+                    code: 400,
+                    message: 'User not found',
+                    success: false,
+                };
+            }
+            await UserModel.destroy({ where: { id: userId } });
+            return {
+                code: 200,
+                message: 'Delete successfully',
+                success: true,
+            };
+        } catch (error) {
+            return {
+                code: 400,
+                message: `Error when deleting user, ${error}`,
+                success: false,
+            };
+        }
+    }
+
+    @Mutation(() => UserResponse)
+    @UseMiddleware(verifyToken)
+    async updateUserInfo(@Arg('userInput') userInput: UserInput): Promise<UserResponse> {
+        try {
+            const existingUser = await UserModel.findOne({ where: { id: userInput.id } });
+            if (existingUser === null) {
+                return {
+                    code: 400,
+                    success: false,
+                    message: 'User not found',
+                };
+            }
+            const [_, updatedUsers] = await UserModel.update(
+                { name: userInput.name, role: userInput.role },
+                { where: { id: userInput.id }, returning: true }
+            );
+            return {
+                code: 200,
+                success: true,
+                message: 'Update user successfully',
+                user: updatedUsers[0],
+            };
+        } catch (error) {
+            return {
+                code: 400,
+                success: false,
+                message: `Error when updating user, ${error}`,
+            };
+        }
     }
 
     @Mutation(() => UserResponse)

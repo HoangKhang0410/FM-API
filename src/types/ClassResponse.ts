@@ -1,3 +1,4 @@
+import { GraphQLYogaError } from '@graphql-yoga/node';
 import { Field, ObjectType } from 'type-graphql';
 import { Class } from '../models/Class';
 import { IMutationResponse } from './MutationResponse';
