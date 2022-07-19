@@ -15,14 +15,14 @@ interface EnrollCreationAttributes extends Optional<EnrollAttributes, 'user_id'>
 @Table
 export class Enroll extends Model<EnrollAttributes, EnrollCreationAttributes> {
     @Field()
-    @ForeignKey(() => User)
     @PrimaryKey
+    @ForeignKey(() => User)
     @Column
     user_id: string;
 
     @Field()
-    @ForeignKey(() => Class)
     @PrimaryKey
+    @ForeignKey(() => Class)
     @Column
     class_id: string;
 }

@@ -8,9 +8,43 @@ import { Context } from '../types/Context';
 import { createToken, sendRefreshToken } from '../utils/auth';
 import { verifyToken } from '../middlewares/auth';
 import { UserInput } from '../types/UserInput';
+import { Enroll } from '../models/Enroll';
+import { Class } from '../models/Class';
 
 @Resolver(() => UserModel)
 export class UserResolver {
+    @Query(() => UserResponse)
+    @UseMiddleware(verifyToken)
+    async getStudentsFromClass(@Arg('classId') classId: string): Promise<UserResponse> {
+        try {
+            const users = await UserModel.findAll({
+                include: [
+                    {
+                        model: Class,
+                        required: true,
+                        through: {
+                            attributes: [],
+                            where: {
+                                class_id: classId,
+                            },
+                        },
+                    },
+                ],
+            });
+            return {
+                code: 200,
+                success: true,
+                message: 'Get Students from a class successfully',
+                users: users,
+            };
+        } catch (error) {
+            return {
+                code: 400,
+                success: false,
+                message: `Error: ${error}`,
+            };
+        }
+    }
     @Query(() => UserResponse)
     @UseMiddleware(verifyToken)
     async getUsers(@Ctx() { user }: Context): Promise<UserResponse> {
