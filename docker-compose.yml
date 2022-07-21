@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+    fm-api-image:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+            - DB_HOST=postgres
+            - DB_NAME=${DB_NAME}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+            - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+        container_name: 'fm-api-container'
+        ports:
+            - "4000:4000"
+    postgres:
+        container_name: postgres_db
+        image: postgres
+        environment:
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "5432:5432"
