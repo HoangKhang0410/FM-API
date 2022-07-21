@@ -27,7 +27,7 @@ async function main() {
         app.use(cors());
         app.use(cookieParser());
         app.use('/graphql', server);
-        await sequelize.sync({ force: true });
+        await sequelize.sync();
         console.log('Connect to db successfully!!!');
 
         app.listen(4000, () => console.log('Running a GraphQL API server at http://localhost:4000/graphql'));
