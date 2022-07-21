@@ -13,6 +13,7 @@ services:
             - ACCESS_TOKEN_SECRET=accesstoken
             - REFRESH_TOKEN_SECRET=refreshtoken
         container_name: 'fm-api-container'
+        restart: always
         ports:
             - '4000:4000'
     postgres:
