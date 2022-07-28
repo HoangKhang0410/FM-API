@@ -1,0 +1,17 @@
+table:
+  schema: public
+  name: Enrolls
+object_relationships:
+  - name: Class
+    using:
+      foreign_key_constraint_on: class_id
+  - name: User
+    using:
+      foreign_key_constraint_on: user_id
+insert_permissions:
+  - role: student
+    permission:
+      check: {}
+      columns:
+        - class_id
+        - user_id

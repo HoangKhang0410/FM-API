@@ -1,0 +1,5 @@
+- name: student_management_schema
+  definition:
+    url: http://host.docker.internal:4000/graphql
+    timeout_seconds: 60
+  comment: ""

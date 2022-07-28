@@ -1,0 +1,9 @@
+- name: student-management
+  kind: postgres
+  configuration:
+    connection_info:
+      use_prepared_statements: false
+      database_url:
+        from_env: HASURA_GRAPHQL_METADATA_DATABASE_URL
+      isolation_level: read-committed
+  tables: "!include student-management/tables/tables.yaml"
