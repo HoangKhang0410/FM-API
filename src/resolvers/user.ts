@@ -30,6 +30,9 @@ export class UserResolver {
                         },
                     },
                 ],
+                where: {
+                    role: 'student',
+                },
             });
             return {
                 code: 200,

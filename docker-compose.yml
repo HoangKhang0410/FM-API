@@ -19,8 +19,27 @@ services:
     postgres:
         container_name: postgres_db
         image: postgres
+        volumes:
+            - db_data:/var/lib/postgresql/data
         environment:
             POSTGRES_USER: username
             POSTGRES_PASSWORD: password
         ports:
             - '5432:5432'
+        restart: always
+    graphql-engine:
+        image: hasura/graphql-engine:v2.8.4
+        ports:
+            - '8080:8080'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        depends_on:
+            - 'postgres'
+        restart: always
+        environment:
+            HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://username:password@postgres:5432/postgres
+            HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+            HASURA_GRAPHQL_DEV_MODE: 'true'
+            HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+volumes:
+    db_data:
